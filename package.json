@@ -1,0 +1,20 @@
+{
+  "name": "adr-reader",
+  "version": "0.1.0",
+  "description": "Serve a folder of Markdown ADRs as a readable site on localhost",
+  "type": "module",
+  "bin": {
+    "adr": "bin/adr.js",
+    "adr-reader": "bin/adr.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20.1"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "marked": "^18.1.1"
+  }
+}
