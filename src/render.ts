@@ -1,0 +1,52 @@
+import path from 'node:path';
+import { marked } from 'marked';
+import type { Adr } from './load.js';
+import { CSS } from './style.js';
+
+const esc = (s: unknown): string => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const fmt = (v: unknown): string => (v instanceof Date ? v.toISOString().slice(0, 10) : Array.isArray(v) ? v.map(fmt).join(', ') : typeof v === 'object' && v ? JSON.stringify(v) : String(v));
+const md = (s: string): string => marked.parse(s, { async: false });
+
+const badge = (status: unknown): string => status ? `<span class="badge s-${esc(String(status).toLowerCase().split(/\s/)[0])}">${esc(status)}</span>` : '';
+
+function sidebar(adrs: Adr[], current: Adr | null): string {
+  let dir: string | null = null, out = '';
+  for (const a of adrs) {
+    const d = path.posix.dirname(a.rel);
+    if (d !== dir) { dir = d; if (d !== '.') out += `<li class="dir">${esc(d)}</li>`; }
+    out += `<li><a href="/${encodeURI(a.rel)}"${a === current ? ' class="active"' : ''} data-q="${esc((a.title + ' ' + a.rel + ' ' + (a.data.status || '')).toLowerCase())}">${esc(a.title)}${badge(a.data.status)}</a></li>`;
+  }
+  return `<aside><a class="home" href="/">ADRs <small>${adrs.length}</small></a>
+<input id="q" type="search" placeholder="Filter…" autocomplete="off" aria-label="Filter ADRs"><ul>${out}</ul></aside>`;
+}
+
+export function page(title: string, adrs: Adr[], current: Adr | null, main: string): string {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title><style>${CSS}</style></head><body>${sidebar(adrs, current)}<main>${main}</main>
+<script>
+const q = document.getElementById('q');
+q.addEventListener('input', () => {
+  const v = q.value.toLowerCase();
+  document.querySelectorAll('aside a[data-q]').forEach((a) => a.parentElement.hidden = !a.dataset.q.includes(v));
+});
+addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); } });
+new EventSource('/__reload').onmessage = () => location.reload();
+</script></body></html>`;
+}
+
+export function indexPage(root: string, adrs: Adr[]): string {
+  const rows = adrs.map((a) => `<tr><td><a href="/${encodeURI(a.rel)}">${esc(a.title)}</a><div class="path">${esc(a.rel)}</div></td><td>${badge(a.data.status)}</td><td class="date">${a.data.date ? esc(fmt(a.data.date)) : ''}</td></tr>`).join('');
+  return page('Architecture Decision Records', adrs, null, `<h1>Architecture Decision Records</h1><p class="path">${esc(root)}</p>
+${adrs.length ? `<table><thead><tr><th>Decision</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No Markdown files found.</p>'}`);
+}
+
+export function adrPage(adrs: Adr[], a: Adr): string {
+  const meta = Object.entries(a.data).filter(([k]) => k !== 'title' && k !== 'status')
+    .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(fmt(v))}</dd>`).join('');
+  const body = a.h1 && !a.data.title ? md(a.content) : `<h1>${esc(a.title)}</h1>${md(a.content)}`;
+  const i = adrs.indexOf(a), prev = adrs[i - 1], next = adrs[i + 1];
+  const nav = (x: Adr | undefined, label: string) => x ? `<a href="/${encodeURI(x.rel)}"><small>${label}</small>${esc(x.title)}</a>` : '<span></span>';
+  return page(a.title, adrs, a, `<div class="meta">${badge(a.data.status)}<span class="path">${esc(a.rel)}</span></div>
+${a.error ? `<p class="warn">Couldn't read the frontmatter: ${esc(a.error)}</p>` : ''}
+${meta ? `<dl>${meta}</dl>` : ''}<article>${body}</article><nav class="pn">${nav(prev, '← Previous')}${nav(next, 'Next →')}</nav>`);
+}

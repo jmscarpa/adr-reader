@@ -176,11 +176,19 @@ adr-reader is a local development tool:
 ```sh
 git clone <repo-url> adr-reader
 cd adr-reader
-npm install
-node bin/adr.js path/to/some/adrs
+npm install          # also compiles src/ into dist/
+node dist/cli.js path/to/some/adrs
 ```
 
-The whole tool is a single file, [`bin/adr.js`](bin/adr.js), built on Node's `http` and `fs.watch` (live reload uses server-sent events), [`gray-matter`](https://github.com/jonschlinkert/gray-matter) and [`marked`](https://github.com/markedjs/marked).
+The source is TypeScript in [`src/`](src), compiled with `tsc` into `dist/` (run `npm run build` after changes, or `npm run typecheck` to check types only). It's built on Node's `http` and `fs.watch` (live reload uses server-sent events), [`gray-matter`](https://github.com/jonschlinkert/gray-matter) and [`marked`](https://github.com/markedjs/marked).
+
+| File               | What it does                                   |
+| ------------------ | ---------------------------------------------- |
+| `src/cli.ts`       | Argument parsing, `--help`, `--version`        |
+| `src/load.ts`      | Finds the Markdown files and reads frontmatter |
+| `src/render.ts`    | HTML for the index, ADR and 404 pages          |
+| `src/server.ts`    | HTTP server, static files and live reload      |
+| `src/style.ts`     | The page's CSS                                 |
 
 To try the `adr` command globally from your checkout:
 
