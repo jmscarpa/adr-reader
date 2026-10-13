@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-13
+
 ### Added
 
 - Themes: Default, GitHub, Paper and Dracula. Readers pick one from the sidebar and the choice is remembered in their browser.
@@ -33,6 +35,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - First release.
 
-[Unreleased]: https://github.com/jmscarpa/adr-reader/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jmscarpa/adr-reader/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jmscarpa/adr-reader/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jmscarpa/adr-reader/compare/c73d47b...v0.2.0
 [0.1.0]: https://github.com/jmscarpa/adr-reader/commit/c73d47b

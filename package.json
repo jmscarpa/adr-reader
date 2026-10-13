@@ -1,6 +1,6 @@
 {
   "name": "adr-reader",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Serve a folder of Markdown ADRs as a readable site on localhost",
   "keywords": [
     "adr",
