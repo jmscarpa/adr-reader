@@ -42,3 +42,11 @@ test('ignores symlinked Markdown that points outside the folder', () => {
   fs.symlinkSync(path.join(outside, 'secret.md'), path.join(root, 'leak.md'));
   assert.deepEqual(load(root).map((a) => a.rel), ['0001.md']);
 });
+
+test('frontmatter status and date win over the body', () => {
+  const root = fixture({
+    '0001.md': '---\nstatus: Rejected\n---\n# A\n\nDate: 2026-01-05\n\n## Status\n\nAccepted\n',
+    '0002.md': '# B\n\nDate: 2026-01-05\n\n## Status\n\nAccepted\n',
+  });
+  assert.deepEqual(load(root).map((a) => [a.status, a.date]), [['Rejected', '2026-01-05'], ['Accepted', '2026-01-05']]);
+});

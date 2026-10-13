@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Themes: Default, GitHub, Paper and Dracula. Readers pick one from the sidebar and the choice is remembered in their browser.
 - `--theme <name>` sets the theme a reader starts with.
+- ADRs without frontmatter get their status and date from the body, as written by adr-tools (`## Status` section, `Date:` line), MADR 2 and log4brains (`* Status:` and `* Date:` bullets).
 
 ## [0.2.0] - 2026-10-13
 

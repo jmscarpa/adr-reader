@@ -20,7 +20,7 @@ function sidebar(adrs: Adr[], current: Adr | null): string {
   for (const a of adrs) {
     const d = path.posix.dirname(a.rel);
     if (d !== dir) { dir = d; if (d !== '.') out += `<li class="dir">${esc(d)}</li>`; }
-    out += `<li><a href="/${encodeURI(a.rel)}"${a === current ? ' class="active"' : ''} data-q="${esc((a.title + ' ' + a.rel + ' ' + (a.data.status || '')).toLowerCase())}">${esc(a.title)}${badge(a.data.status)}</a></li>`;
+    out += `<li><a href="/${encodeURI(a.rel)}"${a === current ? ' class="active"' : ''} data-q="${esc((a.title + ' ' + a.rel + ' ' + (a.status || '')).toLowerCase())}">${esc(a.title)}${badge(a.status)}</a></li>`;
   }
   const themes = Object.entries(THEMES).map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
   return `<aside><div class="top"><a class="home" href="/">ADRs <small>${adrs.length}</small></a>
@@ -54,7 +54,7 @@ new EventSource('/__reload').onmessage = () => location.reload();
 }
 
 export function indexPage(ctx: RenderContext, adrs: Adr[]): string {
-  const rows = adrs.map((a) => `<tr><td><a href="/${encodeURI(a.rel)}">${esc(a.title)}</a><div class="path">${esc(a.rel)}</div></td><td>${badge(a.data.status)}</td><td class="date">${a.data.date ? esc(fmt(a.data.date)) : ''}</td></tr>`).join('');
+  const rows = adrs.map((a) => `<tr><td><a href="/${encodeURI(a.rel)}">${esc(a.title)}</a><div class="path">${esc(a.rel)}</div></td><td>${badge(a.status)}</td><td class="date">${a.date ? esc(fmt(a.date)) : ''}</td></tr>`).join('');
   return page(ctx, 'Architecture Decision Records', adrs, null, `<h1>Architecture Decision Records</h1><p class="path">${esc(ctx.root)}</p>
 ${adrs.length ? `<table><thead><tr><th>Decision</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No Markdown files found.</p>'}`);
 }
@@ -65,7 +65,7 @@ export function adrPage(ctx: RenderContext, adrs: Adr[], a: Adr): string {
   const body = a.h1 && !a.data.title ? md(a.content) : `<h1>${esc(a.title)}</h1>${md(a.content)}`;
   const i = adrs.indexOf(a), prev = adrs[i - 1], next = adrs[i + 1];
   const nav = (x: Adr | undefined, label: string) => x ? `<a href="/${encodeURI(x.rel)}"><small>${label}</small>${esc(x.title)}</a>` : '<span></span>';
-  return page(ctx, a.title, adrs, a, `<div class="meta">${badge(a.data.status)}<span class="path">${esc(a.rel)}</span></div>
+  return page(ctx, a.title, adrs, a, `<div class="meta">${badge(a.status)}<span class="path">${esc(a.rel)}</span></div>
 ${a.error ? `<p class="warn">Couldn't read the frontmatter: ${esc(a.error)}</p>` : ''}
 ${meta ? `<dl>${meta}</dl>` : ''}<article>${body}</article><nav class="pn">${nav(prev, '← Previous')}${nav(next, 'Next →')}</nav>`);
 }
