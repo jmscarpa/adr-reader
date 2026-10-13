@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-13
+
 ### Added
 
 - `--help` and `--version` flags.
@@ -23,3 +25,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ## [0.1.0]
 
 - First release.
+
+[Unreleased]: https://github.com/jmscarpa/adr-reader/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jmscarpa/adr-reader/compare/c73d47b...v0.2.0
+[0.1.0]: https://github.com/jmscarpa/adr-reader/commit/c73d47b
