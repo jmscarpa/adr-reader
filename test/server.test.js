@@ -20,7 +20,7 @@ const root = fixture({
 fs.symlinkSync(path.join(outside, 'secret.png'), path.join(root, 'leak.png'));
 
 const port = await freePort();
-const server = serve({ root, port, fixedPort: true, open: false, dirArg: root });
+const server = serve({ root, port, fixedPort: true, open: false, dirArg: root, theme: 'dracula' });
 await new Promise((resolve) => server.once('listening', resolve));
 test.after(() => { server.closeAllConnections(); server.close(); });
 
@@ -53,4 +53,11 @@ test('does not serve other file types, paths outside the folder or symlinks out 
   for (const p of ['/notes.txt', '/..%2f..%2fetc%2fhostname', '/leak.png', '/missing.md']) {
     assert.equal((await get(p)).status, 404, p);
   }
+});
+
+test('pages start on the configured theme and offer every theme in the picker', async () => {
+  const html = await (await get('/')).text();
+  assert.match(html, /<html lang="en" data-theme="dracula">/);
+  const options = [...html.matchAll(/<option value="([a-z]+)">/g)].map((m) => m[1]);
+  assert.deepEqual(options, ['default', 'github', 'paper', 'dracula']);
 });

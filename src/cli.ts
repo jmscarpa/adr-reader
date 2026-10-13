@@ -2,12 +2,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { serve } from './server.js';
+import { isTheme, THEMES, type Theme } from './style.js';
 
-const USAGE = `Usage: adr-reader [directory] [--no-open]
+const USAGE = `Usage: adr-reader [directory] [--theme <name>] [--no-open]
 
 Serve a folder of Markdown ADRs on localhost.
 
 Options:
+  --theme <name> Default theme: ${Object.keys(THEMES).join(', ')}
+                 Readers can still switch themes in the page.
   --no-open      Don't open the browser on start
   -h, --help     Show this help
   -v, --version  Show the version
@@ -21,12 +24,21 @@ if (args.includes('-v') || args.includes('--version')) {
   console.log(JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version);
   process.exit(0);
 }
-const unknown = args.filter((a) => a.startsWith('-') && a !== '--no-open');
-const dirs = args.filter((a) => !a.startsWith('-'));
-if (unknown.length || dirs.length > 1) {
-  console.error(`${unknown.length ? `Unknown option: ${unknown[0]}` : 'Only one directory can be given'}\n\n${USAGE}`);
-  process.exit(1);
+const fail = (msg: string): never => { console.error(`${msg}\n\n${USAGE}`); process.exit(1); };
+const dirs: string[] = [];
+let theme: Theme = 'default';
+for (let i = 0; i < args.length; i++) {
+  const a = args[i];
+  if (a === '--no-open') continue;
+  if (a === '--theme' || a.startsWith('--theme=')) {
+    const t = a === '--theme' ? args[++i] : a.slice('--theme='.length);
+    if (t === undefined) fail('--theme needs a value');
+    else if (!isTheme(t)) fail(`Unknown theme: ${t}`);
+    else theme = t;
+  } else if (a.startsWith('-')) fail(`Unknown option: ${a}`);
+  else dirs.push(a);
 }
+if (dirs.length > 1) fail('Only one directory can be given');
 const dirArg = dirs[0] || '.';
 
 if (!fs.existsSync(dirArg) || !fs.statSync(dirArg).isDirectory()) {
@@ -42,4 +54,5 @@ serve({
   fixedPort: Boolean(process.env.PORT),
   open: !args.includes('--no-open'),
   dirArg,
+  theme,
 });

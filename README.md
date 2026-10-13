@@ -33,7 +33,8 @@ It reads your files as they are. You don't need a template, a static-site genera
 - **Live reload.** Save an ADR in your editor and the open page updates on its own.
 - **Opens your browser.** The reader opens as soon as the server starts. Pass `--no-open` to turn this off.
 - **Previous/next navigation.** Read your decisions in order, start to finish.
-- **Light and dark mode.** Follows your system setting. The layout also works on mobile.
+- **Themes.** Pick Default, GitHub, Paper or Dracula from the sidebar. Your choice is remembered in the browser, and `--theme` sets the starting theme for everyone.
+- **Light and dark mode.** Every theme follows your system setting, except Dracula, which is always dark. The layout also works on mobile.
 - **Local only.** It listens on `127.0.0.1` and never serves files outside the folder you give it.
 
 ## Install
@@ -76,12 +77,13 @@ adr docs/adr
 ## Usage
 
 ```sh
-adr [directory] [--no-open]
+adr [directory] [--theme <name>] [--no-open]
 ```
 
 | Argument / env | Default | Description                         |
 | -------------- | ------- | ----------------------------------- |
 | `directory`    | `.`     | Folder containing your ADRs         |
+| `--theme`      | `default` | Starting theme: `default`, `github`, `paper` or `dracula` |
 | `--no-open`    | off     | Don't open the browser on start     |
 | `--help`, `-h` |         | Show usage                          |
 | `--version`, `-v` |      | Show the installed version          |
@@ -90,7 +92,7 @@ adr [directory] [--no-open]
 If `4321` is taken, adr-reader moves on to the next free port. A port set with `PORT` is used as given.
 
 ```sh
-PORT=8080 npx adr-reader docs/decisions --no-open
+PORT=8080 npx adr-reader docs/decisions --theme dracula --no-open
 ```
 
 ## Writing ADRs
@@ -188,7 +190,7 @@ The source is TypeScript in [`src/`](src), compiled with `tsc` into `dist/` (run
 | `src/load.ts`      | Finds the Markdown files and reads frontmatter |
 | `src/render.ts`    | HTML for the index, ADR and 404 pages          |
 | `src/server.ts`    | HTTP server, static files and live reload      |
-| `src/style.ts`     | The page's CSS                                 |
+| `src/style.ts`     | The page's CSS and the themes                  |
 
 To try the `adr` command globally from your checkout:
 

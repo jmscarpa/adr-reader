@@ -22,3 +22,9 @@ test('unknown options and missing folders fail', () => {
   assert.match(run('--nope').stderr, /Unknown option: --nope/);
   assert.match(run('does/not/exist').stderr, /Not a directory/);
 });
+
+test('--theme rejects unknown themes and missing values', () => {
+  assert.match(run('--theme', 'neon').stderr, /Unknown theme: neon/);
+  assert.match(run('--theme=neon').stderr, /Unknown theme: neon/);
+  assert.match(run('--theme').stderr, /--theme needs a value/);
+});

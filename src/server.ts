@@ -4,6 +4,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { inRoot, load } from './load.js';
 import { adrPage, indexPage, page } from './render.js';
+import type { Theme } from './style.js';
 
 export interface ServeOptions {
   root: string;
@@ -13,6 +14,7 @@ export interface ServeOptions {
   open: boolean;
   /** The directory as the user typed it, for error hints. */
   dirArg: string;
+  theme?: Theme;
 }
 
 const TYPES: Record<string, string> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.pdf': 'application/pdf' };
@@ -22,7 +24,8 @@ function openBrowser(url: string): void {
   spawn(cmd, [...rest, url], { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
 }
 
-export function serve({ root, port, fixedPort, open, dirArg }: ServeOptions): http.Server {
+export function serve({ root, port, fixedPort, open, dirArg, theme = 'default' }: ServeOptions): http.Server {
+  const ctx = { root, theme };
   // Live reload: browsers hold an SSE connection; any change under root pings them.
   const clients = new Set<http.ServerResponse>();
   let timer: NodeJS.Timeout | undefined;
@@ -43,9 +46,9 @@ export function serve({ root, port, fixedPort, open, dirArg }: ServeOptions): ht
     try { rel = decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname).slice(1); } catch { rel = null; }
     const adrs = load(root);
     const send = (code: number, html: string) => { res.writeHead(code, { 'content-type': 'text/html; charset=utf-8' }); res.end(html); };
-    if (rel === '') return send(200, indexPage(root, adrs));
+    if (rel === '') return send(200, indexPage(ctx, adrs));
     const a = adrs.find((x) => x.rel === rel);
-    if (a) return send(200, adrPage(adrs, a));
+    if (a) return send(200, adrPage(ctx, adrs, a));
     // Static assets (diagrams referenced from ADRs), confined to root.
     const file = rel != null ? path.resolve(root, rel) : null;
     const type = file && TYPES[path.extname(file).toLowerCase()];
@@ -54,7 +57,7 @@ export function serve({ root, port, fixedPort, open, dirArg }: ServeOptions): ht
       fs.createReadStream(file).pipe(res);
       return;
     }
-    send(404, page('Not found', adrs, null, '<h1>Not found</h1><p><a href="/">Back to index</a></p>'));
+    send(404, page(ctx, 'Not found', adrs, null, '<h1>Not found</h1><p><a href="/">Back to index</a></p>'));
   });
 
   server.on('error', (e: NodeJS.ErrnoException) => {
