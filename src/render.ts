@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { marked } from 'marked';
 import type { Adr } from './load.js';
+import { isRelationKey } from './parse.js';
 import { CSS, THEMES, type Theme } from './style.js';
 
 export interface RenderContext {
@@ -53,19 +54,32 @@ new EventSource('/__reload').onmessage = () => location.reload();
 </script></body></html>`;
 }
 
+const link = (a: Adr): string => `<a href="/${encodeURI(a.rel)}">${esc(a.title)}</a>`;
+
+function relations(a: Adr): string {
+  if (!a.relations.length) return '';
+  return `<ul class="rel">${a.relations.map((r) => `<li><span class="label">${esc(r.label)}</span>${link(r.adr)}${badge(r.adr.status)}</li>`).join('')}</ul>`;
+}
+
+/** "by <newer ADR>" under a Superseded badge in the index. */
+const supersededBy = (a: Adr): string => {
+  const by = a.relations.filter((r) => r.label === 'Superseded by');
+  return by.length ? `<div class="by">by ${by.map((r) => link(r.adr)).join(', ')}</div>` : '';
+};
+
 export function indexPage(ctx: RenderContext, adrs: Adr[]): string {
-  const rows = adrs.map((a) => `<tr><td><a href="/${encodeURI(a.rel)}">${esc(a.title)}</a><div class="path">${esc(a.rel)}</div></td><td>${badge(a.status)}</td><td class="date">${a.date ? esc(fmt(a.date)) : ''}</td></tr>`).join('');
+  const rows = adrs.map((a) => `<tr><td><a href="/${encodeURI(a.rel)}">${esc(a.title)}</a><div class="path">${esc(a.rel)}</div></td><td>${badge(a.status)}${supersededBy(a)}</td><td class="date">${a.date ? esc(fmt(a.date)) : ''}</td></tr>`).join('');
   return page(ctx, 'Architecture Decision Records', adrs, null, `<h1>Architecture Decision Records</h1><p class="path">${esc(ctx.root)}</p>
 ${adrs.length ? `<table><thead><tr><th>Decision</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No Markdown files found.</p>'}`);
 }
 
 export function adrPage(ctx: RenderContext, adrs: Adr[], a: Adr): string {
-  const meta = Object.entries(a.data).filter(([k]) => k !== 'title' && k !== 'status')
+  const meta = Object.entries(a.data).filter(([k]) => k !== 'title' && k !== 'status' && !isRelationKey(k))
     .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(fmt(v))}</dd>`).join('');
   const body = a.h1 && !a.data.title ? md(a.content) : `<h1>${esc(a.title)}</h1>${md(a.content)}`;
   const i = adrs.indexOf(a), prev = adrs[i - 1], next = adrs[i + 1];
   const nav = (x: Adr | undefined, label: string) => x ? `<a href="/${encodeURI(x.rel)}"><small>${label}</small>${esc(x.title)}</a>` : '<span></span>';
   return page(ctx, a.title, adrs, a, `<div class="meta">${badge(a.status)}<span class="path">${esc(a.rel)}</span></div>
 ${a.error ? `<p class="warn">Couldn't read the frontmatter: ${esc(a.error)}</p>` : ''}
-${meta ? `<dl>${meta}</dl>` : ''}<article>${body}</article><nav class="pn">${nav(prev, '← Previous')}${nav(next, 'Next →')}</nav>`);
+${meta ? `<dl>${meta}</dl>` : ''}${relations(a)}<article>${body}</article><nav class="pn">${nav(prev, '← Previous')}${nav(next, 'Next →')}</nav>`);
 }

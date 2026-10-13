@@ -14,6 +14,7 @@ const outside = fixture({ 'secret.png': 'secret' });
 const root = fixture({
   '0001-first.md': '---\ntitle: First decision\nstatus: Accepted\ndate: 2026-01-10\ndeciders: [Ana, Bruno]\n---\nSee [next](0002-second.md).\n',
   '0002-second.md': '# Second decision\n',
+  '0003-third.md': '---\ntitle: Third decision\nstatus: Accepted\nsupersedes: 0002-second.md\n---\nBody.\n',
   'diagram.svg': '<svg xmlns="http://www.w3.org/2000/svg"/>',
   'notes.txt': 'not served',
 });
@@ -60,4 +61,14 @@ test('pages start on the configured theme and offer every theme in the picker', 
   assert.match(html, /<html lang="en" data-theme="dracula">/);
   const options = [...html.matchAll(/<option value="([a-z]+)">/g)].map((m) => m[1]);
   assert.deepEqual(options, ['default', 'github', 'paper', 'dracula']);
+});
+
+test('superseded ADRs link to their replacement on the page and in the index', async () => {
+  const page = await (await get('/0002-second.md')).text();
+  assert.match(page, /<ul class="rel"><li><span class="label">Superseded by<\/span><a href="\/0003-third.md">Third decision<\/a>/);
+  assert.match(page, /class="badge s-superseded">Superseded/);
+  const index = await (await get('/')).text();
+  assert.match(index, /<div class="by">by <a href="\/0003-third.md">Third decision<\/a><\/div>/);
+  // The relation is shown as a link, not as a raw row in the metadata table.
+  assert.doesNotMatch(await (await get('/0003-third.md')).text(), /<dt>supersedes<\/dt>/);
 });

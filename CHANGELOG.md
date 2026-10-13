@@ -9,6 +9,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Themes: Default, GitHub, Paper and Dracula. Readers pick one from the sidebar and the choice is remembered in their browser.
 - `--theme <name>` sets the theme a reader starts with.
 - ADRs without frontmatter get their status and date from the body, as written by adr-tools (`## Status` section, `Date:` line), MADR 2 and log4brains (`* Status:` and `* Date:` bullets).
+- Linked decisions: `Supersedes` / `Superseded by` (and adr-tools' `Amends` and `Clarifies`) show as links at the top of each ADR, from frontmatter or the Status section, and are linked both ways. The index shows what replaced a superseded decision.
 
 ## [0.2.0] - 2026-10-13
 

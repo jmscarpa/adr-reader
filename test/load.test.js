@@ -50,3 +50,41 @@ test('frontmatter status and date win over the body', () => {
   });
   assert.deepEqual(load(root).map((a) => [a.status, a.date]), [['Rejected', '2026-01-05'], ['Accepted', '2026-01-05']]);
 });
+
+const rels = (a) => a.relations.map((r) => `${r.label} ${r.adr.rel}`);
+
+test('links ADRs both ways and marks the old one as superseded', () => {
+  const root = fixture({
+    '0001-old.md': '# 1. Old\n\n## Status\n\nAccepted\n',
+    '0002-unrelated.md': '# 2. Unrelated\n',
+    '0003-new.md': '# 3. New\n\n## Status\n\nAccepted\n\nSupersedes [1. Old](0001-old.md)\n',
+  });
+  const [old, , neu] = load(root);
+  assert.deepEqual(rels(neu), ['Supersedes 0001-old.md']);
+  assert.deepEqual(rels(old), ['Superseded by 0003-new.md']);
+  // Status stays as written when the ADR has one; only missing statuses are filled in.
+  assert.equal(old.status, 'Accepted');
+});
+
+test('fills in Superseded when the old record has no status, and resolves numbers', () => {
+  const root = fixture({
+    'a/0001-old.md': '# Old\n',
+    'b/0001-other.md': '# Other\n',
+    'a/0002-new.md': '---\nsupersedes: ADR-0001\n---\n# New\n',
+  });
+  const adrs = load(root);
+  const old = adrs.find((a) => a.rel === 'a/0001-old.md');
+  assert.equal(old.status, 'Superseded');
+  assert.deepEqual(rels(old), ['Superseded by a/0002-new.md']);
+  assert.deepEqual(rels(adrs.find((a) => a.rel === 'b/0001-other.md')), []);
+});
+
+test('does not duplicate a relation stated on both sides, and ignores unknown targets', () => {
+  const root = fixture({
+    '0001.md': '# 1\n\n## Status\n\nSuperseded by [2](0002.md)\n',
+    '0002.md': '# 2\n\n## Status\n\nAccepted\n\nSupersedes [1](0001.md)\n\nSupersedes [9](0009-missing.md)\n',
+  });
+  const [one, two] = load(root);
+  assert.deepEqual(rels(one), ['Superseded by 0002.md']);
+  assert.deepEqual(rels(two), ['Supersedes 0001.md']);
+});

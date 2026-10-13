@@ -87,6 +87,9 @@ dt{color:var(--muted);text-transform:capitalize}dd{margin:0}
 .s-accepted{background:var(--green);color:var(--on-status)}.s-proposed,.s-draft{background:var(--yellow);color:var(--on-status)}
 .s-rejected{background:var(--red);color:var(--on-status)}.s-deprecated,.s-superseded{background:var(--gray);color:var(--on-gray)}
 aside a.active .badge{background:color-mix(in srgb,var(--on-accent) 22%,transparent);color:var(--on-accent)}
+.rel{list-style:none;margin:12px 0 0;padding:0;font-size:14px}.rel li{display:flex;align-items:center;gap:8px;padding:2px 0}
+.rel .label{color:var(--muted);min-width:100px}
+.by{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap}
 .warn{margin:16px 0 0;padding:10px 14px;border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:14px}
 .pn{display:flex;justify-content:space-between;gap:16px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line)}
 .pn a{text-decoration:none;max-width:48%}.pn a:last-child{text-align:right}.pn small{display:block;color:var(--muted)}

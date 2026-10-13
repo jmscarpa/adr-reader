@@ -29,3 +29,21 @@ test('nothing found means no status and no date', () => {
   assert.equal(statusFromBody('# Plain\n\n## Context\n\nStatus: in the body only\n'), undefined);
   assert.equal(dateFromBody('# Plain\n'), undefined);
 });
+
+import { relationsFromBody, relationsFromData } from '../dist/parse.js';
+
+test('relations from adr-tools Status sections', () => {
+  const body = '# 3. Use MySQL\n\n## Status\n\nAccepted\n\nSupersedes [2. Use PostgreSQL](0002-use-postgresql.md)\n\nAmended by [5. Tune MySQL](0005-tune.md)\n\n## Context\n\nSupersedes [x](not-this.md)\n';
+  assert.deepEqual(relationsFromBody(body), [
+    { label: 'Supersedes', ref: '0002-use-postgresql.md' },
+    { label: 'Amended by', ref: '0005-tune.md' },
+  ]);
+});
+
+test('relations from frontmatter, single or list', () => {
+  assert.deepEqual(relationsFromData({ supersedes: '0001-a.md', 'superseded-by': [4, 'ADR-0005'], title: 'x' }), [
+    { label: 'Supersedes', ref: '0001-a.md' },
+    { label: 'Superseded by', ref: '4' },
+    { label: 'Superseded by', ref: 'ADR-0005' },
+  ]);
+});
