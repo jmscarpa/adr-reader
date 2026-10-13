@@ -26,7 +26,7 @@ export function serve({ root, port, fixedPort, open, dirArg }: ServeOptions): ht
   // Live reload: browsers hold an SSE connection; any change under root pings them.
   const clients = new Set<http.ServerResponse>();
   let timer: NodeJS.Timeout | undefined;
-  fs.watch(root, { recursive: true }, () => {
+  const watcher = fs.watch(root, { recursive: true }, () => {
     clearTimeout(timer);
     timer = setTimeout(() => clients.forEach((c) => c.write('data: reload\n\n')), 100);
   });
@@ -62,6 +62,7 @@ export function serve({ root, port, fixedPort, open, dirArg }: ServeOptions): ht
     console.error(e.code === 'EADDRINUSE' ? `Port ${port} is in use. Try PORT=${port + 1} npx adr-reader ${dirArg}` : e.message);
     process.exit(1);
   });
+  server.on('close', () => watcher.close());
   server.on('listening', () => {
     const url = `http://localhost:${port}`;
     console.log(`ADR reader for ${root}\n→ ${url}`);

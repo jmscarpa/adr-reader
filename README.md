@@ -180,7 +180,7 @@ npm install          # also compiles src/ into dist/
 node dist/cli.js path/to/some/adrs
 ```
 
-The source is TypeScript in [`src/`](src), compiled with `tsc` into `dist/` (run `npm run build` after changes, or `npm run typecheck` to check types only). It's built on Node's `http` and `fs.watch` (live reload uses server-sent events), [`gray-matter`](https://github.com/jonschlinkert/gray-matter) and [`marked`](https://github.com/markedjs/marked).
+The source is TypeScript in [`src/`](src), compiled with `tsc` into `dist/` (run `npm run build` after changes, or `npm run typecheck` to check types only). Tests use Node's built-in runner: `npm test` builds and runs everything in `test/`. It's built on Node's `http` and `fs.watch` (live reload uses server-sent events), [`gray-matter`](https://github.com/jonschlinkert/gray-matter) and [`marked`](https://github.com/markedjs/marked).
 
 | File               | What it does                                   |
 | ------------------ | ---------------------------------------------- |
