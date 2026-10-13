@@ -2,6 +2,26 @@
   "name": "adr-reader",
   "version": "0.1.0",
   "description": "Serve a folder of Markdown ADRs as a readable site on localhost",
+  "keywords": [
+    "adr",
+    "architecture-decision-records",
+    "architecture",
+    "decisions",
+    "markdown",
+    "documentation",
+    "madr",
+    "cli"
+  ],
+  "homepage": "https://github.com/jmscarpa/adr-reader#readme",
+  "bugs": {
+    "url": "https://github.com/jmscarpa/adr-reader/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmscarpa/adr-reader.git"
+  },
+  "license": "MIT",
+  "author": "João Mateus Scarpa",
   "type": "module",
   "bin": {
     "adr": "dist/cli.js",
@@ -10,6 +30,12 @@
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test"
+  },
   "engines": {
     "node": ">=20.1"
   },
@@ -20,10 +46,5 @@
   "devDependencies": {
     "@types/node": "^20.19.43",
     "typescript": "^5.9.3"
-  },
-  "scripts": {
-    "build": "tsc",
-    "prepare": "tsc",
-    "typecheck": "tsc --noEmit"
   }
 }
